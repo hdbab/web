@@ -1,18 +1,659 @@
-﻿<!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<title>web</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nimbus — 让团队协作更轻盈</title>
 <style>
- html, body {
-  width: 100%;
-  height: 100%;
-  padding: 0px;
-  margin: 0px;
-}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --accent: #06b6d4;
+    --bg: #ffffff;
+    --bg-soft: #f8fafc;
+    --text: #0f172a;
+    --text-soft: #64748b;
+    --border: #e2e8f0;
+    --radius: 16px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.05);
+    --shadow: 0 10px 30px -10px rgba(99,102,241,.25);
+    --shadow-lg: 0 25px 50px -12px rgba(15,23,42,.15);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ===== Nav ===== */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(255,255,255,.8);
+    backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+  .logo {
+    font-weight: 700;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .logo-dot {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+  }
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--text-soft);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    padding: 8px 18px;
+    background: var(--text);
+    color: #fff;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: transform .2s, opacity .2s;
+  }
+  .nav-cta:hover { transform: translateY(-1px); opacity: .9; }
+
+  /* ===== Hero ===== */
+  .hero {
+    padding: 96px 0 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute;
+    top: -120px; left: 50%;
+    transform: translateX(-50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(99,102,241,.18), transparent 70%);
+    filter: blur(40px);
+    z-index: 0;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 13px;
+    color: var(--text-soft);
+    margin-bottom: 28px;
+    position: relative;
+  }
+  .badge .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #22c55e;
+  }
+  .hero h1 {
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .hero h1 .grad {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero p {
+    font-size: 18px;
+    color: var(--text-soft);
+    max-width: 560px;
+    margin: 0 auto 40px;
+    position: relative;
+  }
+  .hero-actions {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+  }
+  .btn {
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all .2s;
+    cursor: pointer;
+    border: none;
+  }
+  .btn-primary {
+    background: var(--text);
+    color: #fff;
+    box-shadow: var(--shadow);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .btn-ghost {
+    background: #fff;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { background: var(--bg-soft); }
+
+  /* ===== Showcase card ===== */
+  .showcase {
+    margin: 64px auto 0;
+    max-width: 880px;
+    position: relative;
+  }
+  .showcase-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+    padding: 24px;
+    overflow: hidden;
+  }
+  .window-bar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .window-bar span {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: #e2e8f0;
+  }
+  .window-bar span:nth-child(1) { background: #fca5a5; }
+  .window-bar span:nth-child(2) { background: #fcd34d; }
+  .window-bar span:nth-child(3) { background: #86efac; }
+  .mock-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .mock-cell {
+    aspect-ratio: 1.2;
+    background: linear-gradient(135deg, var(--bg-soft), #eef2ff);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-soft);
+    font-size: 12px;
+  }
+  .mock-cell:nth-child(2) {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #fff;
+    font-weight: 600;
+  }
+
+  /* ===== Section ===== */
+  section { padding: 96px 0; }
+  .section-head {
+    text-align: center;
+    max-width: 620px;
+    margin: 0 auto 56px;
+  }
+  .section-tag {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--primary);
+    margin-bottom: 12px;
+  }
+  .section-head h2 {
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 700;
+    letter-spacing: -.02em;
+    margin-bottom: 14px;
+  }
+  .section-head p {
+    color: var(--text-soft);
+    font-size: 17px;
+  }
+
+  /* ===== Features ===== */
+  .features {
+    background: var(--bg-soft);
+  }
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .feature {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    transition: transform .25s, box-shadow .25s;
+  }
+  .feature:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow);
+  }
+  .feature-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 18px;
+    background: linear-gradient(135deg, rgba(99,102,241,.12), rgba(6,182,212,.12));
+  }
+  .feature h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .feature p {
+    color: var(--text-soft);
+    font-size: 15px;
+  }
+
+  /* ===== Pricing ===== */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+  .price-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    position: relative;
+  }
+  .price-card.featured {
+    border-color: var(--primary);
+    box-shadow: var(--shadow);
+    transform: scale(1.03);
+  }
+  .price-tag {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--primary);
+    background: rgba(99,102,241,.1);
+    padding: 4px 10px;
+    border-radius: 999px;
+    display: inline-block;
+    margin-bottom: 14px;
+  }
+  .price-name { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+  .price-amount {
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    margin-bottom: 4px;
+  }
+  .price-amount span { font-size: 16px; font-weight: 500; color: var(--text-soft); }
+  .price-desc { color: var(--text-soft); font-size: 14px; margin-bottom: 24px; }
+  .price-features {
+    list-style: none;
+    margin-bottom: 28px;
+  }
+  .price-features li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 14px;
+    color: var(--text-soft);
+  }
+  .price-features li::before {
+    content: "✓";
+    color: var(--primary);
+    font-weight: 700;
+  }
+  .price-card .btn { width: 100%; justify-content: center; }
+
+  /* ===== Testimonials ===== */
+  .testimonials {
+    background: var(--bg-soft);
+  }
+  .testi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .testi {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+  }
+  .stars { color: #f59e0b; margin-bottom: 14px; font-size: 14px; }
+  .testi-text {
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: 20px;
+    line-height: 1.7;
+  }
+  .testi-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .author-name { font-weight: 600; font-size: 14px; }
+  .author-role { font-size: 13px; color: var(--text-soft); }
+
+  /* ===== CTA ===== */
+  .cta {
+    text-align: center;
+    padding: 96px 0;
+  }
+  .cta-box {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border-radius: 28px;
+    padding: 72px 32px;
+    color: #fff;
+  }
+  .cta-box h2 {
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 700;
+    letter-spacing: -.02em;
+    margin-bottom: 14px;
+  }
+  .cta-box p {
+    opacity: .9;
+    font-size: 17px;
+    margin-bottom: 32px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .cta-box .btn-primary {
+    background: #fff;
+    color: var(--text);
+  }
+
+  /* ===== Footer ===== */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 0;
+    color: var(--text-soft);
+    font-size: 14px;
+  }
+  .foot-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .foot-links {
+    display: flex;
+    gap: 24px;
+  }
+  .foot-links a { color: var(--text-soft); text-decoration: none; }
+  .foot-links a:hover { color: var(--text); }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .feature-grid,
+    .pricing-grid,
+    .testi-grid { grid-template-columns: 1fr; }
+    .price-card.featured { transform: none; }
+    section { padding: 64px 0; }
+    .hero { padding: 64px 0 48px; }
+  }
 </style>
 </head>
 <body>
- <iframe src="https://wygilceb.us-east-1.clawcloudrun.com" style="width:100%;height:100%;" frameborder="0"></iframe>
+
+<nav>
+  <div class="container nav-inner">
+    <div class="logo"><span class="logo-dot"></span> Nimbus</div>
+    <ul class="nav-links">
+      <li><a href="#features">特性</a></li>
+      <li><a href="#pricing">价格</a></li>
+      <li><a href="#testimonials">评价</a></li>
+    </ul>
+    <a href="#pricing" class="nav-cta">免费开始</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+  <div class="container">
+    <span class="badge"><span class="dot"></span> 全新 2.0 版本已发布</span>
+    <h1>让团队协作<br><span class="grad">更轻盈、更高效</span></h1>
+    <p>Nimbus 把任务、文档和沟通整合在一个干净的空间里，帮你专注真正重要的事情。</p>
+    <div class="hero-actions">
+      <a href="#pricing" class="btn btn-primary">免费试用 14 天 →</a>
+      <a href="#features" class="btn btn-ghost">了解更多</a>
+    </div>
+
+    <div class="showcase">
+      <div class="showcase-card">
+        <div class="window-bar"><span></span><span></span><span></span></div>
+        <div class="mock-grid">
+          <div class="mock-cell">任务看板</div>
+          <div class="mock-cell">实时协作</div>
+          <div class="mock-cell">数据分析</div>
+          <div class="mock-cell">文档中心</div>
+          <div class="mock-cell">日程管理</div>
+          <div class="mock-cell">团队动态</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Features -->
+<section id="features" class="features">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-tag">核心特性</div>
+      <h2>为现代团队打造的工作空间</h2>
+      <p>一切你需要的协作工具，都以最简洁的方式呈现。</p>
+    </div>
+    <div class="feature-grid">
+      <div class="feature">
+        <div class="feature-icon">⚡</div>
+        <h3>极速响应</h3>
+        <p>毫秒级加载速度，无论团队规模多大，操作始终流畅顺滑。</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔒</div>
+        <h3>企业级安全</h3>
+        <p>端到端加密与细粒度权限控制，让你的数据安全无忧。</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔄</div>
+        <h3>无缝集成</h3>
+        <p>支持 100+ 主流工具接入，已有工作流无需推倒重来。</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📊</div>
+        <h3>数据洞察</h3>
+        <p>可视化报表与趋势分析，让每一次决策都有据可依。</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🤝</div>
+        <h3>实时协作</h3>
+        <p>多人同时编辑、评论与批注，团队成员永远在同一频道。</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🎨</div>
+        <h3>个性定制</h3>
+        <p>灵活的模板与主题系统，打造符合你品牌的专属空间。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section id="pricing">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-tag">价格方案</div>
+      <h2>选择适合你的计划</h2>
+      <p>所有方案均含 14 天免费试用，无需绑定信用卡。</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-name">入门版</div>
+        <div class="price-amount">¥0<span> /月</span></div>
+        <div class="price-desc">适合个人和小团队开始使用</div>
+        <ul class="price-features">
+          <li>最多 5 位成员</li>
+          <li>10 GB 存储空间</li>
+          <li>基础协作功能</li>
+          <li>社区支持</li>
+        </ul>
+        <a href="#" class="btn btn-ghost">免费开始</a>
+      </div>
+      <div class="price-card featured">
+        <span class="price-tag">最受欢迎</span>
+        <div class="price-name">专业版</div>
+        <div class="price-amount">¥99<span> /月</span></div>
+        <div class="price-desc">为成长型团队量身定制</div>
+        <ul class="price-features">
+          <li>最多 50 位成员</li>
+          <li>1 TB 存储空间</li>
+          <li>高级集成与 API</li>
+          <li>优先邮件支持</li>
+        </ul>
+        <a href="#" class="btn btn-primary">立即升级</a>
+      </div>
+      <div class="price-card">
+        <div class="price-name">企业版</div>
+        <div class="price-amount">定制</div>
+        <div class="price-desc">面向大型组织的完整方案</div>
+        <ul class="price-features">
+          <li>不限成员数量</li>
+          <li>无限存储空间</li>
+          <li>SSO 单点登录</li>
+          <li>专属客户经理</li>
+        </ul>
+        <a href="#" class="btn btn-ghost">联系销售</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section id="testimonials" class="testimonials">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-tag">用户评价</div>
+      <h2>被全球团队所信赖</h2>
+      <p>超过 10,000 支团队用 Nimbus 让工作更简单。</p>
+    </div>
+    <div class="testi-grid">
+      <div class="testi">
+        <div class="stars">★★★★★</div>
+        <p class="testi-text">"切换到 Nimbus 之后，我们团队的沟通成本降低了一半。界面简洁到让人惊艳。"</p>
+        <div class="testi-author">
+          <div class="avatar">LW</div>
+          <div>
+            <div class="author-name">李文</div>
+            <div class="author-role">产品经理 · 字节跳动</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi">
+        <div class="stars">★★★★★</div>
+        <p class="testi-text">"终于有一款工具把任务、文档和沟通整合在一起了。Nimbus 是我用过最好的协作平台。"</p>
+        <div class="testi-author">
+          <div class="avatar">ZH</div>
+          <div>
+            <div class="author-name">张涵</div>
+            <div class="author-role">技术总监 · 蚂蚁集团</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi">
+        <div class="stars">★★★★★</div>
+        <p class="testi-text">"从初创到百人团队，Nimbus 一直陪着我们成长。强烈推荐给所有远程团队。"</p>
+        <div class="testi-author">
+          <div class="avatar">WY</div>
+          <div>
+            <div class="author-name">王宇</div>
+            <div class="author-role">CEO · Lumen Tech</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="container">
+    <div class="cta-box">
+      <h2>准备好让工作更轻盈了吗？</h2>
+      <p>加入 10,000+ 团队，今天就开始使用 Nimbus。</p>
+      <a href="#pricing" class="btn btn-primary">免费开始使用 →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container foot-inner">
+    <div>© 2026 Nimbus Inc. 保留所有权利。</div>
+    <div class="foot-links">
+      <a href="#">隐私政策</a>
+      <a href="#">服务条款</a>
+      <a href="#">联系我们</a>
+    </div>
+  </div>
+</footer>
+
 </body>
 </html>
